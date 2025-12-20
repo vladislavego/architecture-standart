@@ -1,0 +1,34 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+LAYOUT_TOP_DOWN()
+
+Person(customer, "Клиент")
+Person(backOffice, "Менеджер бэк-офиса депозитов")
+
+System_Boundary(ibBoundary, "Интернет-банк") {
+  Container(ibWeb, "Web UI", "ASP.NET MVC 4.5", "Экраны депозитов, ввод суммы/счёта, ввод SMS-кода")
+  Container(ibBackend, "Backend (монолит)", ".NET Framework 4.5", "Интеграция с внешними API, бизнес-логика интернет-банка")
+  ContainerDb(ibDb, "DB", "MS SQL", "Данные интернет-банка")
+  Rel(ibWeb, ibBackend, "HTTP(S)")
+  Rel(ibBackend, ibDb, "SQL")
+}
+
+System_Boundary(absBoundary, "АБС") {
+  Container(absClient, "Desktop Client", "Delphi", "Рабочее место сотрудников")
+  ContainerDb(absDb, "DB", "Oracle + PL/SQL", "Учёт операций и доменная логика в PL/SQL")
+  Container(absIntegration, "Integration Adapter/Job", "Internal", "Синхронизация статусов заявок, интеграция наружу управляемо")
+  Rel(absClient, absDb, "SQL/PL-SQL")
+  Rel(absIntegration, absDb, "SQL/PL-SQL")
+}
+
+Container(depositAppSvc, "Сервис заявок на депозит", "Service", "Приём заявок, статусы, SMS-подтверждение, журнал уведомлений")
+ContainerDb(depositDb, "Хранилище заявок", "DB", "Заявки, статусы, журнал SMS/уведомлений")
+System(smsGateway, "SMS-шлюз оператора", "External", "Отправка SMS")
+
+Rel(customer, ibWeb, "Использует", "HTTPS")
+Rel(ibBackend, depositAppSvc, "CreateApplication / ConfirmSMS / GetRates", "HTTPS/JSON")
+Rel(depositAppSvc, depositDb, "Read/Write", "SQL")
+Rel(depositAppSvc, smsGateway, "Send SMS", "HTTPS")
+Rel(absIntegration, depositAppSvc, "SyncStatus / NotifyOpen", "HTTPS/JSON")
+
+@enduml

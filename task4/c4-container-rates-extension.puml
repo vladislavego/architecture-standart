@@ -1,0 +1,24 @@
+@startuml
+title C4 Container — Передача ставок в кол-центры (MVP расширение)
+
+left to right direction
+
+package "Банк «Стандарт»" {
+
+  rectangle "АБС\nOracle + PL/SQL" as ABS
+
+  rectangle "Адаптер интеграции АБС\nBatch / регламентный экспорт" as Adapter
+
+  rectangle "Deposit Applications Service\nBackend сервис" as DAS
+
+  rectangle "Система кол-центра банка\nJava Spring Boot + React" as CC
+}
+
+rectangle "Система партнёрского кол-центра\n(внешняя)" as PCC
+
+ABS --> Adapter : выгрузка ставок
+Adapter --> DAS : передача ставок
+DAS --> CC : актуальные ставки\n(внутренняя интеграция)
+DAS --> PCC : файл со ставками\n(файловый обмен)
+
+@enduml

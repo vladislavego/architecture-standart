@@ -1,0 +1,29 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Context.puml
+LAYOUT_TOP_DOWN()
+
+Person(customer, "Клиент", "Потенциальный/текущий клиент банка")
+Person(backOffice, "Менеджер бэк-офиса депозитов", "Обрабатывает заявки (MVP) в АБС")
+Person(callAgent, "Оператор кол-центра", "Консультирует клиента, работает с лидами")
+
+System(webSite, "Сайт банка", "PHP + React. Маркетинговая витрина")
+System(ib, "Интернет-банк", "ASP.NET MVC 4.5 + MS SQL. Монолит (подрядчик)")
+System(callCenter, "Система кол-центра", "React + Java Spring Boot + PostgreSQL. Микросервисы (подрядчик)")
+System(abs, "АБС", "Delphi + Oracle + PL/SQL. Внутренняя разработка")
+System(smsGateway, "SMS-шлюз оператора", "Внешний сервис отправки SMS")
+
+System(depositAppSvc, "Сервис заявок на депозит", "Новый компонент MVP: приём заявок, статусы, SMS-подтверждение")
+System(absAdapter, "Адаптер интеграции АБС", "Новый компонент в контуре АБС: синхронизация статусов/данных")
+
+Rel(customer, webSite, "Смотрит предложения", "HTTPS")
+Rel(customer, ib, "Подаёт заявку на депозит", "HTTPS")
+Rel(webSite, callCenter, "Передаёт лид (MVP/след. этап)", "HTTPS")
+Rel(callAgent, callCenter, "Работает с лидами/обращениями")
+Rel(backOffice, abs, "Подтверждает ставку и открывает депозит")
+
+Rel(ib, depositAppSvc, "Создаёт заявку, подтверждает по SMS", "HTTPS/JSON")
+Rel(depositAppSvc, smsGateway, "Отправка SMS (код/уведомления)", "HTTPS")
+Rel(abs, absAdapter, "Данные/статусы по депозитам", "Внутр. интеграция")
+Rel(absAdapter, depositAppSvc, "Синхронизация статусов заявок", "HTTPS/JSON")
+
+@enduml
