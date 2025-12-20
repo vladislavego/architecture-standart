@@ -1,25 +1,24 @@
 @startuml
-title Container Diagram — Передача ставок в кол-центры (MVP extension)
+title C4 Container — Передача ставок в кол-центры (MVP расширение)
 
-actor "Оператор\nкол-центра банка" as CC_Operator
-actor "Оператор\nпартнёрского\nкол-центра" as Partner_Operator
+left to right direction
 
 package "Банк «Стандарт»" {
 
-  component "АБС\n(Oracle + PL/SQL)\n\nИсточник истины\nпо ставкам" as ABS
+  rectangle "АБС\nOracle + PL/SQL" as ABS
 
-  component "Deposit Applications Service\n\nBackend сервис\nраспространения ставок" as DAS
+  rectangle "Адаптер интеграции АБС\nBatch / регламентный экспорт" as Adapter
 
-  component "Система кол-центра банка\n(Java Spring Boot + React)\n\nUI операторов" as CC_System
+  rectangle "Deposit Applications Service\nBackend сервис" as DAS
+
+  rectangle "Система кол-центра банка\nJava Spring Boot + React" as CC
 }
 
-component "Система партнёрского\nкол-центра\n(внешняя)" as Partner_CC
+rectangle "Система партнёрского кол-центра\n(внешняя)" as PCC
 
-ABS --> DAS : Экспорт ставок\n(batch)
-DAS --> CC_System : Актуальные ставки
-DAS --> Partner_CC : Файл со ставками
-
-CC_Operator --> CC_System : Использует
-Partner_Operator --> Partner_CC : Использует
+ABS --> Adapter : выгрузка ставок
+Adapter --> DAS : передача ставок
+DAS --> CC : актуальные ставки\n(внутренняя интеграция)
+DAS --> PCC : файл со ставками\n(файловый обмен)
 
 @enduml

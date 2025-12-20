@@ -1,27 +1,24 @@
 @startuml
-title C4 Context — Передача ставок в кол-центры
+title C4 Context — Передача ставок в кол-центры (MVP расширение)
 
-actor "Клиент банка" as Customer
-actor "Оператор кол-центра банка" as CC_Operator
-actor "Оператор партнёрского кол-центра" as Partner_Operator
+left to right direction
+
+actor "Оператор кол-центра банка" as OpBank
+actor "Оператор партнёрского кол-центра" as OpPartner
 
 rectangle "Банк «Стандарт»" {
-
-  rectangle "АБС\n(Oracle + PL/SQL)\nИсточник истины ставок" as ABS
-
-  rectangle "Deposit Applications Service\n(MVP)\nРаспространение ставок" as DAS
-
-  rectangle "Система кол-центра банка\n(Java + React)" as CC_System
+  rectangle "АБС" as ABS
+  rectangle "Сервис заявок на депозит\n(Deposit Applications Service)" as DAS
+  rectangle "Система кол-центра банка" as CC
 }
 
-rectangle "Система партнёрского\nкол-центра\n(внешняя)" as Partner_CC
+rectangle "Система партнёрского кол-центра\n(внешняя)" as PCC
 
-Customer --> CC_Operator : Запрос консультации
-CC_Operator --> CC_System : Использует UI
-Partner_Operator --> Partner_CC : Использует UI
+OpBank --> CC : консультирует клиента\nпо ставкам
+OpPartner --> PCC : консультирует клиента\nпо ставкам
 
-ABS --> DAS : Экспорт ставок\n(batch)
-DAS --> CC_System : Актуальные ставки
-DAS --> Partner_CC : Файл со ставками
+ABS --> DAS : передаёт ставки
+DAS --> CC : предоставляет актуальные ставки
+DAS --> PCC : передаёт файл\nсо ставками
 
 @enduml
